@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bootstrap demo</title>
+    <meta name="color-scheme" content="light dark">
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65" crossorigin="anonymous">
+</head>
+
+<body class="text-bg-dark">
+    <div class="container p-4 p-md-5 mb-4 rounded ">
+
+        <h1>{{.DirName}}</h1>
+        <div class="accordion accordion-flush" id="rootDir">
+
+            {{range .DirsChils}}
+            {{ $namef := .DirRoot | replace "/" "_" }}
+            {{ $namef := $namef | replace "\\" "_" }}
+            {{ $namef := $namef | replace "." "_" }}
+            {{ $namef := $namef | replace " " "_" }}
+
+
+
+            <div class="accordion-item">
+                <h2 class="accordion-header" id="head-{{$namef}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                        data-bs-target="#flush-{{$namef}}" aria-expanded="false" aria-controls="flush-{{$namef}}">
+                        {{.DirName}}
+                    </button>
+                </h2>
+                <div id="flush-{{$namef}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne"
+                    data-bs-parent="#rootDir">
+                    <div class="list-group">
+                        {{range .DirsChils}}
+                        <a href="/{{.KeyMap}}" class="list-group-item list-group-item-action">{{.DirName}}</a>
+                        {{end}}
+                    </div>
+                    <div class="list-group">
+                        {{range .Files}}
+                        <a href="/file/{{.KeyMap}}" class="list-group-item list-group-item-action">{{.FileName}}</a>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            {{end}}
+        </div>
+
+
+
+        <div class="row">
+            <div class="col-12">
+                Archivos
+            </div>
+            <div class="col-12">
+                <div class="list-group">
+                    {{range .Files}}
+                    <a href="/file/{{.KeyMap}}" class="list-group-item list-group-item-action">{{.FileName}}</a>
+                    {{end}}
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4"
+        crossorigin="anonymous"></script>
+</body>
+
+</html>
