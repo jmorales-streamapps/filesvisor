@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/Jon-MC-dev/files_copy/filepackage"
-	"github.com/Masterminds/sprig/v3"
+	"github.com/Jon-MC-dev/files_copy/old_version/filepackage"
+	"github.com/Masterminds/sprig"
 	"github.com/gorilla/mux"
 )
 
@@ -19,14 +19,14 @@ var templates *template.Template
 var rootDir filepackage.DirModel
 var m map[string]filepackage.DirModel
 
-func main() {
-	fmt.Println(templateFS)
+func Server_init1() {
+	// fmt.Println(templateFS)
 
-	fmt.Println("Hoal mindo")
+	// fmt.Println("Hoal mindo")
 	rootDir = filepackage.ScanRootDir()
-	fmt.Println(filepackage.GetMapDirs())
+	// fmt.Println(filepackage.GetMapDirs())
 
-	// templates = template.Must(templates.ParseGlob("static/*.html"))
+	templates = template.Must(templates.ParseGlob("static/*.html"))
 	templates = template.Must(
 		template.New("base").Funcs(sprig.FuncMap()).Parse(templateFS),
 	)

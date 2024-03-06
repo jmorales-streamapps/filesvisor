@@ -31,8 +31,8 @@ func ScanRootDir() (rootDir DirModel) {
 		strings.Join(strings.Split(strings.Join(strings.Split(rootDir.DirName, "/"), "-"), "."), "_")
 		findInDirectory(files, &rootDir)
 		// recorremos el contenido de la carpeta principal(desde donde se descargo el archivo)
-		fmt.Println("\n\n\n\n\n\n")
-		fmt.Println(rootDir)
+		// fmt.Println("\n\n\n\n\n\n")
+		// fmt.Println(rootDir)
 	}
 	return
 }
@@ -74,5 +74,5 @@ func findInDirectory(filesR []fs.FileInfo, rootDir *DirModel) {
 		}
 
 	}
-	fmt.Printf("%+v\n", rootDir)
+	// fmt.Printf("%+v\n", rootDir)
 }
