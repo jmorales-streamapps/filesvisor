@@ -1,33 +1,20 @@
 package main
 
 import (
-	"embed"
 	"fmt"
 	"log"
 	"net/http"
 
 	"github.com/Jon-MC-dev/files_copy/functions"
-	handlefiles "github.com/Jon-MC-dev/files_copy/handle_files"
 	"github.com/gorilla/mux"
-	"github.com/gorilla/websocket"
 )
 
-//go:embed templates/*
-var content embed.FS
-
-var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
-}
-
 func Server_init2() {
-
-	handlefiles.ReeadDirectory()
 
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		functions.ServeHTML(w, r, "test.html", content)
+		functions.ServeHTML(w, r, "page_nav.html", content, ScannedFiles)
 	})
 	// r.HandleFunc("/{dir}", HomeHandle)
 	// r.HandleFunc("/file/{file}", fileRequest)
@@ -35,6 +22,8 @@ func Server_init2() {
 	err := http.ListenAndServe(fmt.Sprintf(":%s", PORT), r)
 	if err != nil {
 		fmt.Printf("Se inicio en localhost:%s", PORT)
+	} else {
+		fmt.Println(err)
 	}
 
 }
