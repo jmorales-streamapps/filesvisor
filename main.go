@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 
 	handlefiles "github.com/Jon-MC-dev/files_copy/handle_files"
 	"github.com/gorilla/websocket"
@@ -21,7 +20,7 @@ var upgrader = websocket.Upgrader{
 }
 
 func main() {
-	fmt.Printf("content: %v\n", content)
+
 	ScannedFiles = handlefiles.ReeadDirectory()
 
 	//return

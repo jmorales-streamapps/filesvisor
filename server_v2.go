@@ -20,6 +20,10 @@ func Server_init2() {
 	// run --------
 	// r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
+	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		functions.ServeHTML(w, r, "not_found.html", content, nil)
+	})
+
 	r.Use(loggingMiddleware)
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		functions.ServeHTML(w, r, "page_nav.html", content, ScannedFiles)
@@ -34,20 +38,22 @@ func Server_init2() {
 			if valor, existe := handlefiles.MapScannedFiles[parms["dir"]]; existe {
 				functions.ServeHTML(w, r, "page_nav.html", content, valor)
 			} else {
-				functions.ServeHTML(w, r, "not_found.html", content, valor)
+				functions.ServeHTML(w, r, "not_found.html", content, nil)
 
 			}
 
 		}
 	})
-	// r.HandleFunc("/{dir}", HomeHandle)
-	// r.HandleFunc("/file/{file}", fileRequest)
+
+	r.HandleFunc("/file/{file}", fileRequest)
 
 	err := http.ListenAndServe(fmt.Sprintf(":%s", PORT), r)
 	if err != nil {
-		fmt.Printf("Se inicio en localhost:%s", PORT)
-	} else {
 		fmt.Println(err)
+
+	} else {
+		fmt.Printf("Se inicio en localhost:%s\n", PORT)
+
 	}
 
 }
@@ -61,4 +67,42 @@ func loggingMiddleware(next http.Handler) http.Handler {
 		// Llamar al siguiente middleware o controlador en la cadena
 		next.ServeHTTP(w, r)
 	})
+}
+
+func fileRequest(w http.ResponseWriter, r *http.Request) {
+	data := make([]int, 2000)
+	for i := 0; i < 2000; i++ {
+		data[i] = i + 1
+	}
+
+	//functions.ServeHTML(w, r, "info_file.html", content, data)
+	//return
+
+	parms := mux.Vars(r)
+
+	if parms["file"] != "" {
+
+		if file, existe := handlefiles.MapScannedFiles[parms["file"]]; existe {
+			fileInfo := functions.ReadInfo(file.CompleteUrl)
+
+			fileInfoData := struct {
+				Name    string
+				Size    int64
+				ModTime int64
+			}{
+				Name:    fileInfo.Name(),
+				Size:    fileInfo.Size(),
+				ModTime: fileInfo.ModTime().UnixMilli(),
+			}
+			functions.ServeHTML(w, r, "info_file.html", content, fileInfoData)
+		} else {
+			functions.ServeHTML(w, r, "not_found.html", content, nil)
+			// functions.ServeHTML(w, r, "info_file.html", content, nil)
+
+		}
+
+	} else {
+		w.Write([]byte("No se encontro nada"))
+
+	}
 }

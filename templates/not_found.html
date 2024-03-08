@@ -24,6 +24,15 @@
             display: block;
             margin: 0 auto;
         }
+
+        .color-change {
+            filter: invert(0%);
+            transition: filter 0.3s ease;
+        }
+
+        .color-change:hover {
+            filter: invert(50%) sepia(100%) saturate(500%) hue-rotate(180deg);
+        }
     </style>
 </head>
 
@@ -31,7 +40,8 @@
 
     <div class="container">
         <div class="center-content">
-            <img src="/static/detectivo.svg" alt="Lupa" class="center-image img-fluid mb-4" width="200px">
+            <img src="/static/detectivo.svg" alt="Lupa" class="center-image img-fluid mb-4 color-change" width="200px"
+                id="buttonReturn">
             <h1>Recurso no encontrado</h1>
             <p>Lo sentimos, no pudimos encontrar lo que estabas buscando.</p>
         </div>
@@ -40,6 +50,13 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>
+    <script>
+        document.getElementById("buttonReturn").addEventListener('click', () => {
+            // console.log('Se dio click en la imagen');
+            window.location.href = '/';
+
+        })
+    </script>
 </body>
 
 </html>

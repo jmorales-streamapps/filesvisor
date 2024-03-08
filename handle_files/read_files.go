@@ -11,10 +11,11 @@ import (
 var MapScannedFiles map[string]DirectoryNode
 
 type DirectoryNode struct {
-	Name      string          `json:"name"`
-	IsDir     bool            `json:"isDir"`
-	Files     []DirectoryNode `json:"children,omitempty"`
-	Reference string
+	Name        string          `json:"name"`
+	IsDir       bool            `json:"isDir"`
+	Files       []DirectoryNode `json:"children,omitempty"`
+	Reference   string
+	CompleteUrl string
 }
 
 func ReeadDirectory() *DirectoryNode {
@@ -36,16 +37,9 @@ func ReeadDirectory() *DirectoryNode {
 	}
 
 	mainNode.Files = append(mainNode.Files, tree...)
+	mainNode.CompleteUrl = rootDir
 
-	// Convierte la estructura del árbol a formato JSON
-	// jsonData, err := json.MarshalIndent(mainNode, "", "  ")
-	// if err != nil {
-	// 	fmt.Println("Error al convertir a JSON:", err)
-	//	return nil
-	//}
-
-	// Imprime el JSON resultante
-	//fmt.Println(string(jsonData))
+	// functions.PrintJson(mainNode)
 
 	return &mainNode
 
@@ -69,9 +63,10 @@ func buildTree(rootPath string) ([]DirectoryNode, error) {
 		newReference := functions.GenString(10)
 
 		child := DirectoryNode{
-			Name:      file.Name(),
-			IsDir:     file.IsDir(),
-			Reference: newReference,
+			Name:        file.Name(),
+			IsDir:       file.IsDir(),
+			Reference:   newReference,
+			CompleteUrl: childPath,
 		}
 		MapScannedFiles[newReference] = child
 
