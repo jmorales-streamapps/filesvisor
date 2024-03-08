@@ -22,7 +22,7 @@ func ReeadDirectory() *DirectoryNode {
 	MapScannedFiles = make(map[string]DirectoryNode)
 
 	// Ruta del directorio raíz que deseas explorar
-	rootDir := "./test"
+	rootDir := "./"
 
 	// Llama a la función para construir el árbol
 	newReference := functions.GenString(10)
