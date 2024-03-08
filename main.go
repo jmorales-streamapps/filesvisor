@@ -19,7 +19,7 @@ var upgrader = websocket.Upgrader{
 func main() {
 	ScannedFiles = handlefiles.ReeadDirectory()
 
-	return
+	//return
 	// Server_init1()
 	Server_init2()
 }

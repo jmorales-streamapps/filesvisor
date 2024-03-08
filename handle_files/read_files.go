@@ -1,7 +1,6 @@
 package handlefiles
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -9,7 +8,8 @@ import (
 	"github.com/Jon-MC-dev/files_copy/functions"
 )
 
-// Node representa un nodo en la estructura del árbol.
+var MapScannedFiles map[string]DirectoryNode
+
 type DirectoryNode struct {
 	Name      string          `json:"name"`
 	IsDir     bool            `json:"isDir"`
@@ -18,11 +18,16 @@ type DirectoryNode struct {
 }
 
 func ReeadDirectory() *DirectoryNode {
+	// Inicializa el map
+	MapScannedFiles = make(map[string]DirectoryNode)
+
 	// Ruta del directorio raíz que deseas explorar
 	rootDir := "./test"
 
 	// Llama a la función para construir el árbol
-	var result DirectoryNode = DirectoryNode{Name: "Root", IsDir: true, Reference: functions.GenString(10)}
+	newReference := functions.GenString(10)
+	var mainNode DirectoryNode = DirectoryNode{Name: rootDir, IsDir: true, Reference: newReference}
+	MapScannedFiles[newReference] = mainNode
 
 	tree, err := buildTree(rootDir)
 	if err != nil {
@@ -30,19 +35,19 @@ func ReeadDirectory() *DirectoryNode {
 		return nil
 	}
 
-	result.Files = append(result.Files, tree...)
+	mainNode.Files = append(mainNode.Files, tree...)
 
 	// Convierte la estructura del árbol a formato JSON
-	jsonData, err := json.MarshalIndent(result, "", "  ")
-	if err != nil {
-		fmt.Println("Error al convertir a JSON:", err)
-		return nil
-	}
+	// jsonData, err := json.MarshalIndent(mainNode, "", "  ")
+	// if err != nil {
+	// 	fmt.Println("Error al convertir a JSON:", err)
+	//	return nil
+	//}
 
 	// Imprime el JSON resultante
-	fmt.Println(string(jsonData))
+	//fmt.Println(string(jsonData))
 
-	return &result
+	return &mainNode
 
 }
 
@@ -61,12 +66,14 @@ func buildTree(rootPath string) ([]DirectoryNode, error) {
 
 	for _, file := range files {
 		childPath := filepath.Join(rootPath, file.Name())
+		newReference := functions.GenString(10)
 
 		child := DirectoryNode{
 			Name:      file.Name(),
 			IsDir:     file.IsDir(),
-			Reference: functions.GenString(10),
+			Reference: newReference,
 		}
+		MapScannedFiles[newReference] = child
 
 		// Si es un directorio, construye el árbol recursivamente
 		if file.IsDir() {
