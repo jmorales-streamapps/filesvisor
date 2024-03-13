@@ -1,8 +1,10 @@
 package main
 
 import (
+	"database/sql"
 	"embed"
 
+	"github.com/Jon-MC-dev/files_copy/bd"
 	handlefiles "github.com/Jon-MC-dev/files_copy/handle_files"
 	"github.com/gorilla/websocket"
 )
@@ -12,6 +14,10 @@ var static embed.FS
 
 //go:embed templates/*
 var content embed.FS
+
+// / go:embed files_embed/*
+// var embedBD embed.FS
+
 var ScannedFiles *handlefiles.DirectoryNode
 
 var upgrader = websocket.Upgrader{
@@ -19,7 +25,14 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+var bdPreferences *sql.DB
+
 func main() {
+	// bd.EmbedBD = embedBD
+	bdPreferences = bd.OpenBD()
+
+	defer bd.CloseBD(bdPreferences)
+	bd.CreateTable(bdPreferences)
 
 	ScannedFiles = handlefiles.ReeadDirectory()
 

@@ -12,7 +12,29 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <title>[[.Name]]</title>
     <style>
+        .anclado {
+            position: fixed;
+            top: 3%;
+            /*
+            right: 10%;
+            transform: translate(-50%, -50%);*/
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
+        .chunk {
+            width: 10px;
+            height: 10px;
+            background-color: white;
+            margin: 3px;
+        }
+
+        .chunk-view {
+            width: 10px;
+            height: 10px;
+            background-color: aqua;
+            margin: 3px;
+        }
     </style>
 
 </head>
@@ -23,12 +45,20 @@
         <div class="row pt-3">
             <div class="col-9 pl-1">
                 <div class="card p-1">
-                    <h1>Panel Grande</h1>
-                    <p>Contenido del panel grande...</p>
-                    <div id="container_texts">
 
+                    <div v-for="chunk in list_chunks" :key="chunk.id">
 
-                        asdasda
+                        <div v-if="chunk.bytes.length != 0">
+                            <!-- Contenido que se renderiza si se cumple la condición -->
+                            <div class="chunk-loaded">
+                                {{ convertirBytesATexto(chunk.bytes) }}
+                            </div>
+
+                        </div>
+
+                        <!--
+
+                            asdasda
                         <pre>
                             <code class="language">// Tu código aquí
                             function saludar() {
@@ -36,38 +66,151 @@
                             }
                             </code>
                         </pre>
+                        -->
                     </div>
                 </div>
             </div>
             <div class="col">
-                <div class="card " style="width: 18rem;">
-                    <div class="card-header">
-                        Información del Archivo
+                <div class="anclado p-3">
+
+
+                    <div class="card ">
+                        <div class="card-header">
+                            <a style="text-decoration:none" data-bs-toggle="collapse" href="#collapse_info"
+                                role="button" aria-expanded="false" aria-controls="collapse_info">
+                                Información del Archivo
+                            </a>
+                        </div>
+                        <div class="collapse" id="collapse_info">
+                            <ul class="list-group list-group-flush ">
+                                <li class="list-group-item fs-6"><strong>Nombre del Archivo:</strong> <br> [[.Name]]
+                                </li>
+                                <li class="list-group-item"><strong>Fecha de Modificación:</strong> <br>
+                                    {{dateF}}<br>{{humanDate}}</li>
+                                <li class="list-group-item"><strong>Peso:</strong> <br>{{sizeFile}}</li>
+                            </ul>
+                        </div>
+
                     </div>
-                    <ul class="list-group list-group-flush ">
-                        <li class="list-group-item fs-6"><strong>Nombre del Archivo:</strong> <br> [[.Name]]</li>
-                        <li class="list-group-item"><strong>Fecha de Modificación:</strong> <br>
-                            {{dateF}}<br>{{humanDate}}</li>
-                        <li class="list-group-item"><strong>Peso:</strong> <br>{{sizeFile}}</li>
-                    </ul>
-                </div>
-                <br>
-                <div class="card p-3" style="width: 18rem;">
 
-                    <div class="d-flex flex-wrap">
-                        <div v-for="chunk in list_chunks" :key="chunk.id">
-                            <!-- Puedes personalizar el contenido de cada elemento aquí
-                            <p>Elemento {{ elemento }}</p>
-                            -->
-                            <div class="chunk" @click="fetchChunkFromAPI(chunk)" style="cursor: pointer;">.</div>
 
+                    <br>
+
+                    <div class="card">
+                        <div class="card-header">
+
+                            <a style="text-decoration:none" data-bs-toggle="collapse"
+                                href="#collapse_reader_preferences" role="button" aria-expanded="false"
+                                aria-controls="collapse_reader_preferences">
+                                Preferencias de lectura
+                            </a>
+                        </div>
+                        <div class="card-body">
+                            <div class="collapse" id="collapse_reader_preferences">
+                                <div class="btn-group" role="group" aria-label="">
+                                    <input type="radio" class="btn-check" name="por_linea_chunk" id="chunk"
+                                        v-model="pref_opcion" value="por_chunks" autocomplete="off" checked>
+                                    <label class="btn btn-outline-primary" for="chunk">Por chunks</label>
+
+                                    <input type="radio" class="btn-check" name="por_linea_chunk" id="linea"
+                                        v-model="pref_opcion" value="por_lineas" autocomplete="off">
+                                    <label class="btn btn-outline-primary" for="linea">Por lineas</label>
+                                </div>
+
+                                <div v-if="pref_opcion === 'por_chunks'">
+                                    <div class="p-3">
+                                        <small>Cualquier cambio recargará la página</small>
+                                    </div>
+
+
+                                    <div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="peso_chunk"
+                                                id="peso_max1" v-model="pref_peso_chunk" value="10000">
+                                            <label class="form-check-label" for="peso_max1">
+                                                10kb
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="peso_chunk"
+                                                id="peso_max2" v-model="pref_peso_chunk" value="50000">
+                                            <label class="form-check-label" for="peso_max2">
+                                                50kb
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="peso_chunk"
+                                                id="peso_max3" v-model="pref_peso_chunk" value="100000">
+                                            <label class="form-check-label" for="peso_max3">
+                                                100kb
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="peso_chunk"
+                                                id="peso_max4" v-model="pref_peso_chunk" value="500000">
+                                            <label class="form-check-label" for="peso_max4">
+                                                500kb
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="peso_chunk"
+                                                id="peso_max5" v-model="pref_peso_chunk" value="1000000">
+                                            <label class="form-check-label" for="peso_max5">
+                                                1Mb
+                                            </label>
+                                        </div>
+
+                                    </div>
+                                    <div class="p-3">
+                                        <div class="progress" role="progressbar" aria-label="Warning example"
+                                            aria-valuenow="{{contador_reinicio}}" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar"
+                                                :style="{ width: contador_reinicio + '%' }">{{contador_reinicio}}%</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div v-else-if="pref_opcion === 'por_lineas'">
+                                    <br>
+                                    <br>
+                                    <p>Texto correspondiente a la opción 'Por líneas'.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <br>
+
+
+                    <div class="card p-3">
+
+
+                        <div class="card-header banner">
+                            <div v-if="mostrar">
+                                Chunk: {{chunkinf.id}}
+                            </div>
+                            <div v-if="!mostrar">
+                                Chunk:
+                            </div>
+                        </div>
+
+
+                        <div class="">
+                            <div class="d-flex flex-wrap">
+                                <div v-for="chunk in list_chunks" :key="chunk.id">
+                                    <!-- Puedes personalizar el contenido de cada elemento aquí
+                            <p>Elemento {{ elemento }}</p>
+                            -->
+                                    <div class="chunk" @mouseover="showInf(true, chunk)"
+                                        @mouseout="showInf(false, chunk)" @click="fetchDataFromAPI(chunk)"
+                                        style="cursor: pointer;"></div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
 
                 </div>
-
-
-
             </div>
         </div>
 
@@ -170,26 +313,75 @@
         function calcularChunks(tamanoArchivo, tamanoFragmento) {
             return Math.ceil(tamanoArchivo / tamanoFragmento);
         }
+
+
+        function convertirBytesATexto(bytes) {
+            const decoder = new TextDecoder('utf-8');
+            const texto = decoder.decode(new Uint8Array(bytes));
+            return texto;
+        }
+
+
+        function changeSizeChunk() {
+            fetch('/preferences/chunk', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+                .then(response => {
+                    //console.log('Respose');
+                    //console.log(typeof response);
+                    if (!response.ok) {
+                        throw new Error(`Error de red - Código: ${response.status}`);
+                    }
+                    return response.arrayBuffer(); // Puedes cambiar esto según el tipo de respuesta que esperas
+                })
+                .then(data => {
+                    // Maneja los datos de la respuesta aquí
+                    console.log('Respuesta:', data);
+                    chunk.bytes = data
+                })
+                .catch(error => {
+                    // Maneja los errores aquí
+                    console.error('Error en la solicitud:', error);
+                });
+        }
+
+
+
+
+
+
     </script>
 
     <script>
-        const { createApp, ref } = Vue
+        const { createApp, ref, watch } = Vue
         moment.locale('es');
+        let temporizador;
+
 
 
 
         createApp({
             setup() {
+                const contador_reinicio = ref(0);
+                const pref_peso_chunk = ref("[[.PrefSizeChunk]]")
+                const pref_opcion = ref('por_chunks');
+
+                const mostrar = ref(false);
+                const chunkinf = ref(new Chunk(0, 0, 0, new Uint8Array([])));
                 // const list_chunks = [];
                 const date = moment(parseFloat("[[.ModTime]]"));
                 const dateF = date.format('MMMM Do YYYY, h:mm:ss a');
-                let tamanoFragmento = 1024 * 1024; // 1 MB
+                let tamanoFragmento = pref_peso_chunk.value;
 
                 // console.log(date.fromNow());
 
                 const sizeFile = ref(formatBytes('[[.Size]]' != '' ? '[[.Size]]' : '0'))
                 const humanDate = ref(date.fromNow())
-                const fetchChunkFromAPI = fetchDataFromAPI;
+                // const fetchChunkFromAPI = fetchDataFromAPI;
                 let sizeFileServ = parseInt("[[.Size]]")
 
                 // Calcular el número de chunks
@@ -207,12 +399,51 @@
                     })
                 );
 
+
+                const showInf = (m, c) => {
+                    console.log("Mostrar o ocultar");
+                    mostrar.value = m;
+
+                    if (mostrar.value) {
+                        chunkinf.value = c;
+                    }
+                }
+
+
+
+                watch(pref_peso_chunk, (nuevoValor, viejoValor) => {
+                    console.log(`pref_peso_chunk: ${nuevoValor}-${viejoValor}`);
+                    if (nuevoValor !== viejoValor) {
+                        if (temporizador != null || temporizador != undefined) {
+                            clearInterval(temporizador);
+                            contador_reinicio.value = 0;
+                        } else {
+                            console.log('temporizador::::::::::::::: ', temporizador);
+                        }
+
+                        temporizador = setInterval(() => {
+                            contador_reinicio.value = contador_reinicio.value + 20;
+                            if (contador_reinicio.value == 100) {
+                                clearInterval(temporizador);
+                            }
+                        }, 1000);
+                        // changeSizeChunk()
+                    }
+                });
+
                 return {
                     sizeFile,
                     humanDate,
                     dateF,
                     list_chunks,
-                    fetchChunkFromAPI
+                    fetchDataFromAPI,
+                    convertirBytesATexto,
+                    showInf,
+                    mostrar,
+                    chunkinf,
+                    pref_opcion,
+                    pref_peso_chunk,
+                    contador_reinicio
                 }
             }
         }).mount('#app')

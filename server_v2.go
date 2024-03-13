@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Jon-MC-dev/files_copy/bd"
 	"github.com/Jon-MC-dev/files_copy/functions"
 	handlefiles "github.com/Jon-MC-dev/files_copy/handle_files"
 	"github.com/gorilla/mux"
@@ -47,7 +48,8 @@ func Server_init2() {
 	r.HandleFunc("/file/{file}", fileRequest)
 
 	fmt.Println("chunk")
-	r.HandleFunc("/chunk/chunk", methos)
+	r.HandleFunc("/chunk/chunk", methos).Methods("POST")
+	r.HandleFunc("/preferences/chunk", configureSizeChunk).Methods("POST")
 
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		functions.ServeHTML(w, r, "not_found.html", content, nil)
@@ -92,17 +94,29 @@ func fileRequest(w http.ResponseWriter, r *http.Request) {
 			fileInfo := functions.ReadInfo(file.CompleteUrl)
 
 			fileInfoData := struct {
-				Name      string
-				Size      int64
-				ModTime   int64
-				Reference string
+				Name          string
+				Size          int64
+				ModTime       int64
+				Reference     string
+				PrefSizeChunk string
 			}{
-				Name:      fileInfo.Name(),
-				Size:      fileInfo.Size(),
-				ModTime:   fileInfo.ModTime().UnixMilli(),
-				Reference: file.Reference,
+				Name:          fileInfo.Name(),
+				Size:          fileInfo.Size(),
+				ModTime:       fileInfo.ModTime().UnixMilli(),
+				Reference:     file.Reference,
+				PrefSizeChunk: "100000",
 			}
 			fmt.Println("el total de bytes es: ", fileInfoData.Size)
+
+			prefSizeChunk, _ := bd.GetPreference(bdPreferences, "PrefSizeChunk")
+			if prefSizeChunk != "" {
+				fileInfoData.PrefSizeChunk = prefSizeChunk
+			}
+			fmt.Printf("El peso de las preferencias es ", fileInfoData.PrefSizeChunk, "\n")
+			fmt.Println(".")
+			fmt.Println(prefSizeChunk)
+			fmt.Println(".")
+
 			functions.ServeHTML(w, r, "info_file.html", content, fileInfoData)
 		} else {
 			functions.ServeHTML(w, r, "not_found.html", content, nil)
@@ -178,4 +192,22 @@ func ServeChunks(file handlefiles.DirectoryNode, fileRequest struct {
 	fmt.Println(fmt.Sprintf("longitud de bytes: %d", len(extractedData)))
 	w.Write(extractedData)
 
+}
+
+func configureSizeChunk(w http.ResponseWriter, r *http.Request) {
+	chunkW := &struct {
+		NewSize int32 `json:"newSize"`
+	}{
+		NewSize: 10_000,
+	}
+
+	err := json.NewDecoder(r.Body).Decode(chunkW)
+	if err != nil {
+		w.Write([]byte(err.Error()))
+
+		return
+	}
+
+	fmt.Println("newChunk:::: ", chunkW)
+	w.Write([]byte("1"))
 }

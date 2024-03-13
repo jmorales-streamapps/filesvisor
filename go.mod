@@ -18,6 +18,7 @@ require (
 	github.com/joho/godotenv v1.5.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
+	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/copystructure v1.2.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/op/go-logging v0.0.0-20160315200505-970db520ece7 // indirect

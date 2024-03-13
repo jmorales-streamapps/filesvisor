@@ -61,6 +61,9 @@ func buildTree(rootPath string) ([]DirectoryNode, error) {
 	for _, file := range files {
 		childPath := filepath.Join(rootPath, file.Name())
 		newReference := functions.GenString(10)
+		if file.Name() == "generated.json" {
+			newReference = "generated.json"
+		}
 
 		child := DirectoryNode{
 			Name:        file.Name(),
