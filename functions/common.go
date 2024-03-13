@@ -6,6 +6,7 @@ import (
 	"io/fs"
 	"math/rand"
 	"os"
+	"reflect"
 	"time"
 )
 
@@ -55,4 +56,9 @@ func ReadInfo(completeRoute string) fs.FileInfo {
 	fmt.Println("Modo de permisos:", info.Mode())
 	fmt.Println("Tiempo de modificación:", info.ModTime())
 	return info
+}
+
+func IsNumeric(value interface{}) bool {
+	kind := reflect.TypeOf(value).Kind()
+	return kind >= reflect.Int && kind <= reflect.Float64
 }

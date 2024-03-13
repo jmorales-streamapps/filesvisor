@@ -1,10 +1,14 @@
 package bd
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+)
 
 var table = "preferences"
 
 func SavePreference(db *sql.DB, key, value string) error {
+	fmt.Println("Se va a guardar el valor: ", value)
 	query := "INSERT OR REPLACE INTO " + table + " (key, value) VALUES (?, ?);"
 	_, err := db.Exec(query, key, value)
 	return err
@@ -14,6 +18,9 @@ func GetPreference(db *sql.DB, key string) (string, error) {
 	var value string
 	query := "SELECT value FROM " + table + " WHERE key = ?;"
 	err := db.QueryRow(query, key).Scan(&value)
+	fmt.Println("value - - - - - - - - - - - - - - - - ")
+	fmt.Println(value)
+	fmt.Println("value - - - - - - - - - - - - - - - - ")
 	return value, err
 }
 

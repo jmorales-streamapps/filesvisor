@@ -112,7 +112,7 @@ func fileRequest(w http.ResponseWriter, r *http.Request) {
 			if prefSizeChunk != "" {
 				fileInfoData.PrefSizeChunk = prefSizeChunk
 			}
-			fmt.Printf("El peso de las preferencias es ", fileInfoData.PrefSizeChunk, "\n")
+			fmt.Printf("El peso de las preferencias es %s", fileInfoData.PrefSizeChunk)
 			fmt.Println(".")
 			fmt.Println(prefSizeChunk)
 			fmt.Println(".")
@@ -195,6 +195,8 @@ func ServeChunks(file handlefiles.DirectoryNode, fileRequest struct {
 }
 
 func configureSizeChunk(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("newChunk:::: ", "configuracion de chunk")
+
 	chunkW := &struct {
 		NewSize int32 `json:"newSize"`
 	}{
@@ -203,11 +205,16 @@ func configureSizeChunk(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(chunkW)
 	if err != nil {
-		w.Write([]byte(err.Error()))
-
+		w.Write([]byte("0"))
 		return
 	}
 
-	fmt.Println("newChunk:::: ", chunkW)
-	w.Write([]byte("1"))
+	err = bd.SavePreference(bdPreferences, "PrefSizeChunk", fmt.Sprint(chunkW.NewSize))
+	if err != nil {
+		w.Write([]byte("1"))
+		return
+	}
+
+	fmt.Println("newChunk:::: ", chunkW.NewSize)
+	w.Write([]byte("-1"))
 }

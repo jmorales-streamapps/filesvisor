@@ -23,17 +23,17 @@
         }
 
         .chunk {
-            width: 10px;
-            height: 10px;
+            width: 6px;
+            height: 6px;
             background-color: white;
-            margin: 3px;
+            margin: 2.5px;
         }
 
         .chunk-view {
-            width: 10px;
-            height: 10px;
+            width: 6px;
+            height: 6px;
             background-color: aqua;
-            margin: 3px;
+            margin: 2.5px;
         }
     </style>
 
@@ -164,8 +164,8 @@
                                     <div class="p-3">
                                         <div class="progress" role="progressbar" aria-label="Warning example"
                                             aria-valuenow="{{contador_reinicio}}" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar"
-                                                :style="{ width: contador_reinicio + '%' }">{{contador_reinicio}}%</div>
+                                            <div class="progress-bar" :style="{ width: contador_reinicio + '%' }">
+                                                {{contador_reinicio}}%</div>
                                         </div>
                                     </div>
                                 </div>
@@ -322,26 +322,26 @@
         }
 
 
-        function changeSizeChunk() {
+        function changeSizeChunk(newSize) {
             fetch('/preferences/chunk', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data),
+                body: JSON.stringify({
+                    newSize: parseInt(newSize)
+                }),
             })
                 .then(response => {
-                    //console.log('Respose');
-                    //console.log(typeof response);
                     if (!response.ok) {
                         throw new Error(`Error de red - Código: ${response.status}`);
                     }
-                    return response.arrayBuffer(); // Puedes cambiar esto según el tipo de respuesta que esperas
+                    return response.text(); // Puedes cambiar esto según el tipo de respuesta que esperas
                 })
                 .then(data => {
-                    // Maneja los datos de la respuesta aquí
                     console.log('Respuesta:', data);
-                    chunk.bytes = data
+                    window.location.reload();
+
                 })
                 .catch(error => {
                     // Maneja los errores aquí
@@ -422,12 +422,13 @@
                         }
 
                         temporizador = setInterval(() => {
-                            contador_reinicio.value = contador_reinicio.value + 20;
-                            if (contador_reinicio.value == 100) {
+                            contador_reinicio.value = contador_reinicio.value + 33;
+                            if (contador_reinicio.value >= 100) {
                                 clearInterval(temporizador);
+                                changeSizeChunk(pref_peso_chunk.value)
+
                             }
                         }, 1000);
-                        // changeSizeChunk()
                     }
                 });
 
