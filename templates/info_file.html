@@ -35,6 +35,12 @@
             background-color: aqua;
             margin: 2.5px;
         }
+
+        .DivWithScroll {
+            height: 120px;
+            overflow: scroll;
+            overflow-x: hidden;
+        }
     </style>
 
 </head>
@@ -49,10 +55,23 @@
                     <div v-for="chunk in list_chunks" :key="chunk.id">
 
                         <div v-if="chunk.bytes.length != 0">
-                            <!-- Contenido que se renderiza si se cumple la condición -->
-                            <div class="chunk-loaded">
+                            <div class="text-success" :id="'chunk_section_num_'+chunk.id">
+                                Chunk {{chunk.id}}
+                                <hr>
+                            </div>
+
+
+                            <div v-if="!pref_modelLine">
                                 {{ convertirBytesATexto(chunk.bytes) }}
                             </div>
+                            <div v-else>
+                                <pre>
+                                    <code class="language">{{ convertirBytesATexto(chunk.bytes) }}</code>
+                                </pre>
+                            </div>
+
+
+
 
                         </div>
 
@@ -159,6 +178,12 @@
                                                 1Mb
                                             </label>
                                         </div>
+                                        <br>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" role="switch" id="modeline"
+                                                v-model="pref_modelLine">
+                                            <label class="form-check-label" for="modeline">Modo de líneas</label>
+                                        </div>
 
                                     </div>
                                     <div class="p-3">
@@ -180,12 +205,12 @@
                     <br>
 
 
-                    <div class="card p-3">
+                    <div class="card p-3" >
 
 
                         <div class="card-header banner">
                             <div v-if="mostrar">
-                                Chunk: {{chunkinf.id}}
+                                Chunk: {{chunkinf.id}} {{chunkinf.status}}
                             </div>
                             <div v-if="!mostrar">
                                 Chunk:
@@ -193,15 +218,24 @@
                         </div>
 
 
-                        <div class="">
+                        <div class="DivWithScroll">
                             <div class="d-flex flex-wrap">
                                 <div v-for="chunk in list_chunks" :key="chunk.id">
                                     <!-- Puedes personalizar el contenido de cada elemento aquí
                             <p>Elemento {{ elemento }}</p>
                             -->
-                                    <div class="chunk" @mouseover="showInf(true, chunk)"
-                                        @mouseout="showInf(false, chunk)" @click="fetchDataFromAPI(chunk)"
-                                        style="cursor: pointer;"></div>
+                                    <div v-if="chunk.status === statusChunk.emty" class="chunk"
+                                        @mouseover="showInf(true, chunk)" @mouseout="showInf(false, chunk)"
+                                        @click="fetchDataFromAPI(chunk)" style="cursor: pointer;"></div>
+
+
+
+                                    <div v-if="chunk.status === statusChunk.loaded" class="chunk-view"
+                                        @mouseover="showInf(true, chunk)" @mouseout="showInf(false, chunk)"
+                                        @click="fetchDataFromAPI(chunk)" style="cursor: pointer;">
+
+                                    </div>
+
 
                                 </div>
                             </div>
@@ -234,12 +268,18 @@
 
     <!-- and it's easy to individually load additional languages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/go.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-scrollto"></script>
 
 
 
-    <script>hljs.initHighlightingOnLoad();</script>
+    <script>hljs.highlightAll();</script>
 
     <script>
+        const statusChunk = {
+            emty: 'emty',
+            error: 'error',
+            loaded: 'loaded'
+        }
         class Chunk {
             constructor(id, startByte, endByte, bytes) {
                 this.id = id;
@@ -247,6 +287,8 @@
                 this.startByte = startByte;
                 this.endByte = endByte;
                 this.bytes = bytes;
+                this.status = statusChunk.emty;
+
             }
 
             toString() {
@@ -273,7 +315,13 @@
 
             console.log(`id CHUNK: ${chunk}`);
             if (chunk.bytes.length != 0) {
+                /*
+                setTimeout(() => {
+                    document.getElementById(`chunk_section_num_${chunk.id}`).scrollIntoView({ behavior: 'smooth' });
 
+                }, 2000)
+                */
+                VueScrollTo.scrollTo(`#chunk_section_num_${chunk.id}`, 500, {});
             } else {
 
                 const data = {
@@ -300,10 +348,18 @@
                         // Maneja los datos de la respuesta aquí
                         console.log('Respuesta:', data);
                         chunk.bytes = data
+                        chunk.status = statusChunk.loaded;
+                        /*
+                        setTimeout(() => {
+                            document.getElementById(`chunk_section_num_${chunk.id}`).scrollIntoView({ behavior: 'smooth' });
+
+                        }, 2000)*/
                     })
                     .catch(error => {
                         // Maneja los errores aquí
                         console.error('Error en la solicitud:', error);
+                        chunk.status = statusChunk.error;
+
                     });
             }
 
@@ -329,7 +385,7 @@
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    newSize: parseInt(newSize)
+                    sizeChunk: parseInt(newSize)
                 }),
             })
                 .then(response => {
@@ -350,6 +406,34 @@
         }
 
 
+        function preferenceModeline(activate) {
+            fetch('/preferences/modeline', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    modeLine: activate
+                }),
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`Error de red - Código: ${response.status}`);
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log('Respuesta:', data);
+                    window.location.reload();
+                })
+                .catch(error => {
+                    // Maneja los errores aquí
+                    console.error('Error en la solicitud:', error);
+                });
+        }
+
+
+
 
 
 
@@ -357,17 +441,20 @@
     </script>
 
     <script>
-        const { createApp, ref, watch } = Vue
+        const { createApp, ref, watch, computed, use } = Vue
+        // console.log(VueScrollTo);
+
         moment.locale('es');
         let temporizador;
 
 
 
 
-        createApp({
+        app = createApp({
             setup() {
+                const pref_modelLine = ref("[[.Prefs.ModeLine]]")
                 const contador_reinicio = ref(0);
-                const pref_peso_chunk = ref("[[.PrefSizeChunk]]")
+                const pref_peso_chunk = ref(parseInt("[[.Prefs.SizeChunk]]"))
                 const pref_opcion = ref('por_chunks');
 
                 const mostrar = ref(false);
@@ -410,27 +497,41 @@
                 }
 
 
-
-                watch(pref_peso_chunk, (nuevoValor, viejoValor) => {
-                    console.log(`pref_peso_chunk: ${nuevoValor}-${viejoValor}`);
-                    if (nuevoValor !== viejoValor) {
-                        if (temporizador != null || temporizador != undefined) {
-                            clearInterval(temporizador);
-                            contador_reinicio.value = 0;
-                        } else {
-                            console.log('temporizador::::::::::::::: ', temporizador);
-                        }
-
-                        temporizador = setInterval(() => {
-                            contador_reinicio.value = contador_reinicio.value + 33;
-                            if (contador_reinicio.value >= 100) {
+                function watch_v2(varrr, funtionnnn) {
+                    watch(varrr, (nuevoValor, viejoValor) => {
+                        // console.log(`pref_peso_chunk: ${nuevoValor}-${viejoValor}`);
+                        if (nuevoValor !== viejoValor) {
+                            if (temporizador != null || temporizador != undefined) {
                                 clearInterval(temporizador);
-                                changeSizeChunk(pref_peso_chunk.value)
-
+                                contador_reinicio.value = 0;
+                            } else {
+                                console.log('temporizador::::::::::::::: ', temporizador);
                             }
-                        }, 1000);
-                    }
-                });
+
+                            temporizador = setInterval(() => {
+                                contador_reinicio.value = contador_reinicio.value + 33;
+                                if (contador_reinicio.value >= 100) {
+                                    clearInterval(temporizador);
+                                    funtionnnn();
+
+                                }
+                            }, 1000);
+                        }
+                    });
+                }
+
+                watch_v2(pref_peso_chunk, () => {
+                    changeSizeChunk(pref_peso_chunk.value)
+                })
+
+                watch_v2(pref_modelLine, () => {
+                    preferenceModeline(pref_modelLine.value)
+                })
+
+
+
+
+
 
                 return {
                     sizeFile,
@@ -444,10 +545,17 @@
                     chunkinf,
                     pref_opcion,
                     pref_peso_chunk,
-                    contador_reinicio
+                    contador_reinicio,
+                    statusChunk,
+                    pref_modelLine
+
                 }
             }
-        }).mount('#app')
+        })
+
+        app.use(VueScrollTo)
+        app.mount('#app')
+
     </script>
 </body>
 

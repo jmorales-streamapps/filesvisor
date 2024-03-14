@@ -10,6 +10,7 @@ import (
 	"github.com/Jon-MC-dev/files_copy/bd"
 	"github.com/Jon-MC-dev/files_copy/functions"
 	handlefiles "github.com/Jon-MC-dev/files_copy/handle_files"
+	"github.com/Jon-MC-dev/files_copy/models"
 	"github.com/gorilla/mux"
 	httplogger "github.com/jesseokeya/go-httplogger"
 )
@@ -50,6 +51,7 @@ func Server_init2() {
 	fmt.Println("chunk")
 	r.HandleFunc("/chunk/chunk", methos).Methods("POST")
 	r.HandleFunc("/preferences/chunk", configureSizeChunk).Methods("POST")
+	r.HandleFunc("/preferences/modeline", configureModeLine).Methods("POST")
 
 	r.NotFoundHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		functions.ServeHTML(w, r, "not_found.html", content, nil)
@@ -94,27 +96,22 @@ func fileRequest(w http.ResponseWriter, r *http.Request) {
 			fileInfo := functions.ReadInfo(file.CompleteUrl)
 
 			fileInfoData := struct {
-				Name          string
-				Size          int64
-				ModTime       int64
-				Reference     string
-				PrefSizeChunk string
+				Name      string
+				Size      int64
+				ModTime   int64
+				Reference string
+				Prefs     *models.Preferences
 			}{
-				Name:          fileInfo.Name(),
-				Size:          fileInfo.Size(),
-				ModTime:       fileInfo.ModTime().UnixMilli(),
-				Reference:     file.Reference,
-				PrefSizeChunk: "100000",
+				Name:      fileInfo.Name(),
+				Size:      fileInfo.Size(),
+				ModTime:   fileInfo.ModTime().UnixMilli(),
+				Reference: file.Reference,
+				Prefs:     models.LoadPreferences(bdPreferences),
 			}
 			fmt.Println("el total de bytes es: ", fileInfoData.Size)
 
-			prefSizeChunk, _ := bd.GetPreference(bdPreferences, "PrefSizeChunk")
-			if prefSizeChunk != "" {
-				fileInfoData.PrefSizeChunk = prefSizeChunk
-			}
-			fmt.Printf("El peso de las preferencias es %s", fileInfoData.PrefSizeChunk)
 			fmt.Println(".")
-			fmt.Println(prefSizeChunk)
+			fmt.Println(fileInfoData.Prefs.SizeChunk)
 			fmt.Println(".")
 
 			functions.ServeHTML(w, r, "info_file.html", content, fileInfoData)
@@ -195,26 +192,39 @@ func ServeChunks(file handlefiles.DirectoryNode, fileRequest struct {
 }
 
 func configureSizeChunk(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("newChunk:::: ", "configuracion de chunk")
+	var preferences *models.Preferences = models.DefaultPreferences()
 
-	chunkW := &struct {
-		NewSize int32 `json:"newSize"`
-	}{
-		NewSize: 10_000,
-	}
-
-	err := json.NewDecoder(r.Body).Decode(chunkW)
+	err := json.NewDecoder(r.Body).Decode(preferences)
 	if err != nil {
 		w.Write([]byte("0"))
 		return
 	}
 
-	err = bd.SavePreference(bdPreferences, "PrefSizeChunk", fmt.Sprint(chunkW.NewSize))
+	err = bd.SavePreference(bdPreferences, "PrefSizeChunk", fmt.Sprint(preferences.SizeChunk))
 	if err != nil {
 		w.Write([]byte("1"))
 		return
 	}
 
-	fmt.Println("newChunk:::: ", chunkW.NewSize)
+	fmt.Println("newChunk:::: ", preferences.SizeChunk)
+	w.Write([]byte("-1"))
+}
+
+func configureModeLine(w http.ResponseWriter, r *http.Request) {
+	var preferences *models.Preferences = models.DefaultPreferences()
+
+	err := json.NewDecoder(r.Body).Decode(preferences)
+	if err != nil {
+		w.Write([]byte("0"))
+		return
+	}
+
+	err = bd.SavePreference(bdPreferences, "PrefModeLine", fmt.Sprint(preferences.ModeLine))
+	if err != nil {
+		w.Write([]byte("1"))
+		return
+	}
+
+	fmt.Println("preferences.ModeLine:::: ", preferences.ModeLine)
 	w.Write([]byte("-1"))
 }
