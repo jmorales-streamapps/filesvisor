@@ -205,7 +205,7 @@
                     <br>
 
 
-                    <div class="card p-3" >
+                    <div class="card p-3">
 
 
                         <div class="card-header banner">
@@ -424,7 +424,7 @@
                 })
                 .then(data => {
                     console.log('Respuesta:', data);
-                    window.location.reload();
+                    // window.location.reload();
                 })
                 .catch(error => {
                     // Maneja los errores aquí
@@ -524,8 +524,17 @@
                     changeSizeChunk(pref_peso_chunk.value)
                 })
 
+                /*
                 watch_v2(pref_modelLine, () => {
+
                     preferenceModeline(pref_modelLine.value)
+                })
+                */
+                watch(pref_modelLine, (nuevoValor, viejoValor) => {
+                    // console.log(`pref_peso_chunk: ${nuevoValor}-${viejoValor}`);
+                    if (nuevoValor !== viejoValor) {
+                        preferenceModeline(pref_modelLine.value)
+                    }
                 })
 
 
